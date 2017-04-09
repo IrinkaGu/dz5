@@ -1,6 +1,8 @@
 const http = require('http');
+const querystring = require('querystring');
 const port = 3000;
-const url = 'http://netology.tomilomark.ru/api/v1/hash';
+const host = 'netology.tomilomark.ru';
+const path = '/api/v1/hash';
 
 function parse(data, type){
 	switch (type){
@@ -29,18 +31,39 @@ let server = http.createServer();
 server.on('error', err=>console.error(err));
 
 server.on('request', (req, res) => {
-	/*const request = http.request(url);
-	request.on('response',handler);
-	request.end();*/
-	
 	let data = '';
 	req.on('data', chunk => data += chunk);
 	req.on('end', () => {
-		parse_data = parse(data, req.headers);
-		//Перевести данные в читаемый вид
-		console.log(`Получены данные: ${data}`);
+		parse_data = parse(data, req.headers['content-type']);
+		console.log(`Получены данные: ${parse_data.firstName} ${parse_data.lastName}`);
+		
+		let data_hash = querystring.stringify({
+			'lastName' : 'gusarova'
+		});
+		
+		let options = {
+			hostname: host,
+			port: port,
+			path: path,
+			method:'POST',
+			headers:{
+				'Firstname': 'irina',
+				'Content-Type': 'application/json'
+				
+			}
+		}
+		
+		const request = http.request(options);
+		request.write(data_hash);
+		request.on('response',handler);
+		request.end();
 		res.writeHead(200,'OK', {'Content-Type': 'text/plain'});
-		res.write(data);
+		let answer = querystring.stringify({
+			'Firstname': 'irina',
+			'lastName' : 'gusarova',
+			'hash':'dasadasda'
+		});
+		res.write(answer);
 		res.end();
 	})
 })
