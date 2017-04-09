@@ -17,17 +17,6 @@ function parse(data, type){
 	return data;
 }
 
-function handler(response){
-	let data = '';
-	response.on('data',function(chunk){
-		data += chunk;
-	});
-	
-	response.on('end', function (){
-		console.log(data);
-	});
-}
-
 let server = http.createServer();
 server.on('error', err=>console.error(err));
 
@@ -56,16 +45,23 @@ server.on('request', (req, res) => {
 		
 		const request = http.request(options);
 		request.write(data_hash);
-		request.on('response',handler);
-		request.end();
-		res.writeHead(200,'OK', {'Content-Type': 'text/plain'});
-		let answer = querystring.stringify({
-			'Firstname': parse_data.firstName,
-			'lastName' : parse_data.lastName,
-			'hash':data_hash
+		request.on('response', (response) => {
+			let data = '';
+			response.on('data', chunk => data += chunk);
+			
+			response.on('end', function (){
+				console.log(data);
+				res.writeHead(200,'OK', {'Content-Type': 'text/plain'});
+				let answer = querystring.stringify({
+					'Firstname': parse_data.firstName,
+					'lastName' : parse_data.lastName,
+					'hash': data
+				});
+				res.write(answer);
+				res.end();
+			});
 		});
-		res.write(answer);
-		res.end();
+		request.end();
 	})
 })
 
