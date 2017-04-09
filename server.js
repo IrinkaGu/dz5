@@ -50,12 +50,13 @@ server.on('request', (req, res) => {
 			response.on('data', chunk => data += chunk);
 			
 			response.on('end', function (){
-				console.log(data);
-				res.writeHead(200,'OK', {'Content-Type': 'text/plain'});
-				let answer = querystring.stringify({
-					'Firstname': parse_data.firstName,
+				let hash = parse(data, 'application/json');
+				console.log(`Секретный ключ:${hash.hash}`);
+				res.writeHead(200,'OK', {'Content-Type': 'application/json'});
+				let answer = JSON.stringify({
+					'firstName': parse_data.firstName,
 					'lastName' : parse_data.lastName,
-					'hash': data
+					'secretKey': hash.hash
 				});
 				res.write(answer);
 				res.end();
