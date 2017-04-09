@@ -1,5 +1,6 @@
 const http = require('http');
 const querystring = require('querystring');
+
 const port = 3000;
 const host = 'netology.tomilomark.ru';
 const path = '/api/v1/hash';
@@ -37,17 +38,17 @@ server.on('request', (req, res) => {
 		parse_data = parse(data, req.headers['content-type']);
 		console.log(`Получены данные: ${parse_data.firstName} ${parse_data.lastName}`);
 		
-		let data_hash = querystring.stringify({
-			'lastName' : 'gusarova'
+		let data_hash = JSON.stringify({
+			'lastName' : parse_data.lastName
 		});
 		
 		let options = {
 			hostname: host,
-			port: port,
+			port: 80,
 			path: path,
 			method:'POST',
 			headers:{
-				'Firstname': 'irina',
+				'Firstname': parse_data.firstName,
 				'Content-Type': 'application/json'
 				
 			}
@@ -59,9 +60,9 @@ server.on('request', (req, res) => {
 		request.end();
 		res.writeHead(200,'OK', {'Content-Type': 'text/plain'});
 		let answer = querystring.stringify({
-			'Firstname': 'irina',
-			'lastName' : 'gusarova',
-			'hash':'dasadasda'
+			'Firstname': parse_data.firstName,
+			'lastName' : parse_data.lastName,
+			'hash':data_hash
 		});
 		res.write(answer);
 		res.end();
